@@ -1,0 +1,12 @@
+.mainPage table,
+.mainPage tr,
+.mainPage th,
+.mainPage td {
+  border: 1.9px solid black;
+}
+.mainPage td {
+  padding: 7px 10px;
+}
+.mainPage th {
+  padding: 5px 10px;
+}

@@ -94,7 +94,7 @@ const MainPage = () => {
 
   const handleSendData = async () => {
     try {
-      const res = await axios.post("http://localhost:5002/api/send-email", {
+      const res = await axios.post("https://cruds-assignment.onrender.com/api/send-email", {
         selectedRows: filteredRows,
       });
       console.log("Succesfully sent email");

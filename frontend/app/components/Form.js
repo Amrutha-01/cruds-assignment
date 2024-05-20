@@ -5,10 +5,16 @@ import * as yup from "yup";
 import axios from "axios";
 // import { useDispatch } from "react-redux";
 import { setTableData } from "@/redux/tableDataSlice";
-import { EditIcon,DeleteIcon } from "@chakra-ui/icons";
+import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 
-
-const Form = ({ onClose ,onSave,setOnSave}) => {
+const Form = ({
+  onClose,
+  onOpen,
+  onSave,
+  setOnSave,
+  editingRow,
+  setEditingRow,
+}) => {
   const validationSchema = yup.object().shape({
     name: yup.string().required("Name is required"),
     phNo: yup.string().required("Phone number is required"),
@@ -22,23 +28,31 @@ const Form = ({ onClose ,onSave,setOnSave}) => {
   // useFormik hook to manage form state and validation
   const formik = useFormik({
     initialValues: {
-      sno: 1,
-      name: "",
-      phNo: "",
-      email: "",
-      hobbies: "",
+      sno: editingRow ? editingRow.sno : 1,
+      name: editingRow ? editingRow.name : "",
+      phNo: editingRow ? editingRow.phNo : "",
+      email: editingRow ? editingRow.email : "",
+      hobbies: editingRow ? editingRow.hobbies : "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       onClose(true);
-      setOnSave(true)
-      await axios
-        .get("http://localhost:5002/api/getUsers")
-        .then((res) => addUser(values,res.data.users.length))
-        .catch((err) => console.log(err));
-      // console.log(res);
-      // addUser(values);
-      // You can add your save logic here
+      setOnSave(true);
+      if (editingRow) {
+        onOpen("open");
+        await axios.put(
+          `http://localhost:5002/api/users/${editingRow._id}`,
+          values
+        );
+        const response = await axios.get("http://localhost:5002/api/getUsers");
+        setTableData(response.data.users);
+        setEditingRow(null);
+      } else {
+        await axios
+          .get("https://cruds-assignment.onrender.com/api/getUsers")
+          .then((res) => addUser(values, res.data.users.length))
+          .catch((err) => console.log(err));
+      }
       formik.resetForm();
     },
   });
@@ -46,14 +60,14 @@ const Form = ({ onClose ,onSave,setOnSave}) => {
   // const dispatch = useDispatch();
   const [userData, setUserData] = useState(null);
 
-  const addUser = async (values,length) => {
-      await axios
-        .post("http://localhost:5002/api/addUser", {
-          ...values,
-          sno: length + 1,
-        })
-        .then((data) => console.log(data))
-        .catch((err) => console.log(err));
+  const addUser = async (values, length) => {
+    await axios
+      .post("https://cruds-assignment.onrender.com/api/addUser", {
+        ...values,
+        sno: length + 1,
+      })
+      .then((data) => console.log(data))
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -128,7 +142,7 @@ const Form = ({ onClose ,onSave,setOnSave}) => {
           disabled={!formik.isValid}
           className="bg-black text-white rounded-lg px-6 py-2"
         >
-          Save
+          {editingRow ? "Update" : "Save"}
         </button>
       </div>
     </form>
